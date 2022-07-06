@@ -90,7 +90,6 @@ public class Cons_LOP extends ConstraintData<Cons_LOP, Conshdlr_LOP> {
 		}
 		
 		if(nGen > 0) {
-			System.out.println("Separated with "+nGen);
 			return SCIP_RESULT.SCIP_SEPARATED;
 		} else
 			return SCIP_RESULT.SCIP_DIDNOTFIND;
