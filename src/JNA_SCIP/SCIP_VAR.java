@@ -3,6 +3,8 @@ package JNA_SCIP;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
 
+import static JNA_SCIP.MemoryLayout.*;
+
 public class SCIP_VAR extends PointerType {
 	public SCIP_VAR() {}
 	public SCIP_VAR(Pointer p) {
@@ -20,7 +22,12 @@ public class SCIP_VAR extends PointerType {
 	}
 	
 	//SCIPvarGetName
-	public String getName() { return JSCIP.varGetName(this); }
+	public String getName() {
+		if(DIRECT_MEM)
+			return this.getPointer().getPointer(16*d_sz + 2*dom_sz + var_field_data_sz).getString(0);
+		else
+			return JSCIP.varGetName(this);
+	}
 	//SCIPvarGetNUses
 	public int getNUses() { return JSCIP.varGetNUses(this); }
 	//SCIPvarGetType
@@ -28,15 +35,40 @@ public class SCIP_VAR extends PointerType {
 	//SCIPvarGetStatus
 	public SCIP_VARSTATUS getStatus() { return JSCIP.varGetStatus(this); }
 	//SCIPvarGetObj
-	public double getObj() { return JSCIP.varGetObj(this); }
+	public double getObj() {
+		if(DIRECT_MEM)
+			return this.getPointer().getDouble(8*0);
+		else
+			return JSCIP.varGetObj(this);
+	}
 	//SCIPvarGetLbLocal
-	public double getLbLocal() { return JSCIP.varGetLbLocal(this); }
+	public double getLbLocal() {
+		if(DIRECT_MEM)
+			return this.getPointer().getDouble(16*d_sz + dom_sz);
+		else
+			return JSCIP.varGetLbLocal(this);
+	}
 	//SCIPvarGetUbLocal
-	public double getUbLocal() { return JSCIP.varGetUbLocal(this); }
+	public double getUbLocal() {
+		if(DIRECT_MEM)
+			return this.getPointer().getDouble(17*d_sz + dom_sz);
+		else
+			return JSCIP.varGetUbLocal(this);
+	}
 	//SCIPvarGetLbGlobal
-	public double getLbGlobal() { return JSCIP.varGetLbGlobal(this); }
+	public double getLbGlobal() {
+		if(DIRECT_MEM)
+			return this.getPointer().getDouble(16*d_sz);
+		else
+			return JSCIP.varGetLbGlobal(this);
+	}
 	//SCIPvarGetUbGlobal
-	public double getUbGlobal() { return JSCIP.varGetUbGlobal(this); }
+	public double getUbGlobal() {
+		if(DIRECT_MEM)
+			return this.getPointer().getDouble(17*d_sz);
+		else
+			return JSCIP.varGetUbGlobal(this);
+	}
 	//SCIPvarGetLbOriginal
 	public double getLbOriginal() { return JSCIP.varGetLbOriginal(this); }
 	//SCIPvarGetUbOriginal

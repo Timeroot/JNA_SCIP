@@ -174,6 +174,14 @@ public final class SCIP extends PointerType {
 	public boolean isCutEfficacious(SCIP_SOL sol, SCIP_ROW cut) {
 		return JSCIP.isCutEfficacious(this, sol, cut);
 	}
+	//SCIPisEfficacious
+	public boolean isEfficacious(double efficacy) {
+		//TODO speed up with direct access, maybe
+		return JSCIP.isEfficacious(this, efficacy);
+	}
+	/* END scip_cut.h */
+
+	/* scip_dialog.h */
 	//SCIPstartInteraction
 	public void startInteraction() { JSCIP.CALL_SCIPstartInteraction(this); }
 	//SCIPfree
@@ -282,8 +290,32 @@ public final class SCIP extends PointerType {
 	//SCIPgetVerbLevel
 	public SCIP_VERBLEVEL getVerbLevel() { return JSCIP.getVerbLevel(this); };
 	
+	/* scip_numerics.h */
 	//SCIPinfinity
 	public double infinity() { return JSCIP.infinity(this); }
+	
+	//TODO: improve performance on comparison calls with direct memory mapping.
+	//SCIPisFeasEQ
+	public boolean isFeasEQ(SCIP scip, double x, double y) { return JSCIP.isFeasEQ(scip, x, y); }
+	//SCIPisFeasLT
+	public boolean isFeasLT(SCIP scip, double x, double y) { return JSCIP.isFeasLT(scip, x, y); }
+	//SCIPisFeasLE
+	public boolean isFeasLE(SCIP scip, double x, double y) { return JSCIP.isFeasLE(scip, x, y); }
+	//SCIPisFeasGT
+	public boolean isFeasGT(SCIP scip, double x, double y) { return JSCIP.isFeasGT(scip, x, y); }
+	//SCIPisFeasGE
+	public boolean isFeasGE(SCIP scip, double x, double y) { return JSCIP.isFeasGE(scip, x, y); }
+	//SCIPisFeasZero
+	public boolean isFeasZero(SCIP scip, double x) { return JSCIP.isFeasZero(scip, x); }
+	//SCIPisFeasPositive
+	public boolean isFeasPositive(SCIP scip, double x) { return JSCIP.isFeasPositive(scip, x); }
+	//SCIPisFeasNegative
+	public boolean isFeasNegative(SCIP scip, double x) { return JSCIP.isFeasNegative(scip, x); }
+	//SCIPisFeasIntegral
+	public boolean isFeasIntegral(SCIP scip, double x) { return JSCIP.isFeasIntegral(scip, x); }
+	/* END scip_numerics.h */
+	
+	/* scip_param.h */
 	//SCIPsetRealParam
 	public void setRealParam(String name, double value) { JSCIP.CALL_SCIPsetRealParam(this, name, value); }
 	//SCIPsetCharParam
@@ -369,6 +401,70 @@ public final class SCIP extends PointerType {
 	}
 	//SCIPgetSolVal
 	public double getSolVal(SCIP_SOL sol, SCIP_VAR var) { return JSCIP.getSolVal(this, sol, var); }
+	//SCIPgetSolVals
+	//Offer a few methods -- one where it allocates the array for you, one where it fills in an array
+	//And a version of each for 2D arrays as well
+	public void getSolVals(SCIP_SOL sol, SCIP_VAR[] vars, double[] vals) {
+		JSCIP.getSolVals(this, sol, vars, vals);
+	}
+	public double[] getSolVals(SCIP_SOL sol, SCIP_VAR[] vars) {
+		double[] vals = new double[vars.length];
+		JSCIP.getSolVals(this, sol, vars, vals);
+		return vals;
+	}
+	public void getSolVals(SCIP_SOL sol, SCIP_VAR[][] vars, double[][] vals) {
+		//if there are null vars, we skip them. Otherwise we can use fast copying
+		boolean hasnulls = false;
+		
+		int n = 0; 
+		for(SCIP_VAR[] row : vars)
+			for(SCIP_VAR var : row)
+				if(var != null)
+					n++;
+				else
+					hasnulls = true;
+		
+		SCIP_VAR[] flattenedVars = new SCIP_VAR[n];
+		double[] flattenedVals = new double[n];
+
+		n = 0;
+		for(SCIP_VAR[] row : vars) {
+			if(!hasnulls) {
+				System.arraycopy(row, 0, flattenedVars, n, row.length);
+				n += row.length;
+			} else {
+				for(SCIP_VAR var : row)
+					if(var != null)
+						flattenedVars[n++] = var;
+			}
+		}
+		
+		JSCIP.getSolVals(this, sol, flattenedVars, flattenedVals);
+		
+		n = 0;
+		for(int r=0; r<vals.length; r++) {
+			double[] row = vals[r];
+			if(!hasnulls) {
+				System.arraycopy(flattenedVals, n, row, 0, row.length);
+				n += row.length;
+			} else {
+				for(int c=0; c<row.length; c++) {
+					if(vars[r][c] != null)
+						row[c] = flattenedVals[n++];
+				}
+			}
+		}
+	}
+	public double[][] getSolVals(SCIP_SOL sol, SCIP_VAR[][] vars) {
+		double[][] vals = new double[vars.length][];
+		for(int r = 0; r < vars.length; r++) {
+			int w = vars[r].length;
+			vals[r] = new double[w];
+		}
+		this.getSolVals(sol, vars, vals);
+		return vals;
+	}
+	
 	//SCIPgetSolOrigObj
 	public double getSolOrigObj(SCIP_SOL sol) {
 		return JSCIP.getSolOrigObj(this, sol);

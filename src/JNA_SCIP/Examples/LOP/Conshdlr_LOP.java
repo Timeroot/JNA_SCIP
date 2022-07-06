@@ -10,20 +10,20 @@ public class Conshdlr_LOP extends ConstraintHandler<Cons_LOP,Conshdlr_LOP> {
 	//Uncomment block below for the equivalent of #define SCIP_DEBUG.
 	//But it will hold for all Java code, not just this class.
 	
-//	static{ SCIP.DEBUG = true; }
+	//static{ SCIP.DEBUG = true; }
 	
 	/* Constants to define behavior and timing */ 
-	static final String CONSHDLR_NAME = "lop";
-	static final String CONSHDLR_DESC           = "linear ordering constraint handler";
-	static final int CONSHDLR_SEPAPRIORITY      = 100;
-	static final int CONSHDLR_ENFOPRIORITY      = -100;
-	static final int CONSHDLR_CHECKPRIORITY     = -100;
-	static final int CONSHDLR_SEPAFREQ          = 1;
-	static final int CONSHDLR_PROPFREQ          = 1;
-	static final int CONSHDLR_EAGERFREQ         = 100;
-	static final boolean CONSHDLR_DELAYSEPA     = false;
-	static final boolean CONSHDLR_DELAYPROP     = false;
-	static final boolean CONSHDLR_NEEDSCONS     = true;
+	static final String CONSHDLR_NAME		= "lop";
+	static final String CONSHDLR_DESC		= "linear ordering constraint handler";
+	static final int CONSHDLR_SEPAPRIORITY	= 100;
+	static final int CONSHDLR_ENFOPRIORITY	= -100;
+	static final int CONSHDLR_CHECKPRIORITY	= -100;
+	static final int CONSHDLR_SEPAFREQ		= 1;
+	static final int CONSHDLR_PROPFREQ		= 1;
+	static final int CONSHDLR_EAGERFREQ		= 100;
+	static final boolean CONSHDLR_DELAYSEPA	= false;
+	static final boolean CONSHDLR_DELAYPROP	= false;
+	static final boolean CONSHDLR_NEEDSCONS	= true;
 	static final SCIP_PROPTIMING CONSHDLR_PROP_TIMING = SCIP_PROPTIMING.BEFORELP;
 	
 	/* Static methods for including the handler into SCIP or creating constraints. */
@@ -68,49 +68,9 @@ public class Conshdlr_LOP extends ConstraintHandler<Cons_LOP,Conshdlr_LOP> {
 			boolean checklprows, boolean printreason, boolean completely) {
 		for(Cons_LOP cons : conss) {
 			scip.debugMsg("checking linear ordering constraint <"+cons.getName()+">.\n");
-			SCIP_VAR[][] vars = cons.vars;
-			int n = vars.length;
-
-			/* check triangle inequalities and symmetry equations */
-		    for(int i=0; i<n; i++) {
-		    	for(int j=i+1; j<n; j++) {
-		    		boolean oneIJ = scip.getSolVal(sol, vars[i][j]) > 0.5;
-		    		boolean oneJI = scip.getSolVal(sol, vars[j][i]) > 0.5;
-		    		
-					if ( oneIJ == oneJI ) {
-						scip.debugMsg("constraint <"+cons.getName()+"> infeasible (violated equation).\n");
-						scip.debugMsg("%s == %f, %s == %f\n", vars[i][j].getName(), scip.getSolVal(sol, vars[i][j]),
-								vars[j][i].getName(), scip.getSolVal(sol, vars[j][i]));
-						if( printreason ) {
-							scip.infoMessage(null,
-							"violation: symmetry equation violated <%s> = %.15g and <%s> = %.15g\n",
-							vars[i][j].getName(), scip.getSolVal(sol, vars[i][j]),
-							vars[j][i].getName(), scip.getSolVal(sol, vars[j][i]));
-						}
-						return SCIP_INFEASIBLE;
-					}
-					
-					for(int k=i+1; k<n; k++) {
-						if(k==j)
-							continue;
-						
-						boolean oneJK = scip.getSolVal(sol, vars[j][k]) > 0.5;
-			    		boolean oneKI = scip.getSolVal(sol, vars[k][i]) > 0.5;
-			    		
-			    		if (oneIJ && oneJK && oneKI) {
-		    				scip.debugMsg("constraint <"+cons.getName()+"> infeasible (violated triangle ineq.).\n");
-							if( printreason ) {
-								scip.infoMessage(null,
-								"violation: triangle inequality violated <%s> = %.15g, <%s> = %.15g, <%s> = %.15g\n",
-								vars[i][j].getName(), scip.getSolVal(sol, vars[i][j]),
-								vars[j][k].getName(), scip.getSolVal(sol, vars[j][k]),
-								vars[k][i].getName(), scip.getSolVal(sol, vars[k][i]));
-							}
-							return SCIP_INFEASIBLE;
-						}
-					}
-		    	}
-		    }
+			
+			if(!cons.isFeasible_Integral(scip, sol, printreason))
+				return SCIP_INFEASIBLE;
 		}
 		scip.debugMsg("all linear ordering constraints are feasible.\n");
 		return SCIP_FEASIBLE;
@@ -139,39 +99,13 @@ public class Conshdlr_LOP extends ConstraintHandler<Cons_LOP,Conshdlr_LOP> {
 	public SCIP_RESULT consenfops(SCIP scip, Cons_LOP[] conss, int nusefulconss, boolean solinfeasible,
 			boolean objinfeasible) {
 		for(Cons_LOP cons : conss) {
-				scip.debugMsg("enforcing pseudo solution for linear ordering constraint <"+cons.getName()+">.\n");
-				
-				SCIP_VAR[][] vars = cons.vars;
-				int n = vars.length;
-				
-				/* check triangle inequalities and symmetry equations */
-			    for(int i=0; i<n; i++) {
-			    	for(int j=i+1; j<n; j++) {
-			    		boolean oneIJ = scip.getSolVal(null, vars[i][j]) > 0.5;
-			    		boolean oneJI = scip.getSolVal(null, vars[j][i]) > 0.5;
-			    		
-						if ( oneIJ == oneJI ) {
-							scip.debugMsg("constraint <"+cons.getName()+"> infeasible (violated equation).\n");
-							return SCIP_INFEASIBLE;
-						}
-						
-						for(int k=i+1; k<n; k++) {
-							if(k==j)
-								continue;
-							
-							boolean oneJK = scip.getSolVal(null, vars[j][k]) > 0.5;
-				    		boolean oneKI = scip.getSolVal(null, vars[k][i]) > 0.5;
-				    		
-				    		if (oneIJ && oneJK && oneKI) {
-			    				scip.debugMsg("constraint <"+cons.getName()+"> infeasible (violated triangle ineq.).\n");
-								return SCIP_INFEASIBLE;
-							}
-						}
-			    	}
-			    }
-			}
-			scip.debugMsg("all linear ordering constraints are feasible.\n");
-			return SCIP_FEASIBLE;
+			
+			scip.debugMsg("enforcing pseudo solution for linear ordering constraint <"+cons.getName()+">.\n");
+			if(!cons.isFeasible_Integral(scip, null, false))
+				return SCIP_INFEASIBLE;
+		}
+		scip.debugMsg("all linear ordering constraints are feasible.\n");
+		return SCIP_FEASIBLE;
 	}
 
 	@Override
@@ -181,8 +115,8 @@ public class Conshdlr_LOP extends ConstraintHandler<Cons_LOP,Conshdlr_LOP> {
 			return SCIP_DIDNOTRUN;
 		
 		for(Cons_LOP cons : conss) {
-			scip.debugMsg("enforcing lp solution for linear ordering constraint <"+cons.getName()+">.\n");
 			
+			scip.debugMsg("enforcing lp solution for linear ordering constraint <"+cons.getName()+">.\n");
 			SCIP_RESULT separation_res = cons.LOPseparate(scip, null);
 			
 			//CUTOFF or SEPARATED

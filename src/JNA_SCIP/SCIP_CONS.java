@@ -3,6 +3,8 @@ package JNA_SCIP;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
 
+import static JNA_SCIP.MemoryLayout.*;
+
 public class SCIP_CONS extends PointerType {
 	public SCIP_CONS() {}
 	public SCIP_CONS(Pointer p) {
@@ -23,13 +25,28 @@ public class SCIP_CONS extends PointerType {
 	}
 	
 	//SCIPconsGetName
-	public String getName(){ return JSCIP.consGetName(this); }
+	public String getName(){
+		if(DIRECT_MEM)
+			return this.getPointer().getPointer(d_sz).getString(0);
+		else
+			return JSCIP.consGetName(this);
+	}
 	//SCIPconsGetPos
 	public int getPos(){ return JSCIP.consGetPos(this); }
 	//SCIPconsGetHdlr
-	public SCIP_CONSHDLR getHdlr(){ return JSCIP.consGetHdlr(this); }
+	public SCIP_CONSHDLR getHdlr(){
+		if(DIRECT_MEM)
+			return new SCIP_CONSHDLR(this.getPointer().getPointer(2*d_sz));
+		else
+			return JSCIP.consGetHdlr(this);
+	}
 	//SCIPconsGetData
-	public SCIP_CONSDATA getData(){ return JSCIP.consGetData(this); }
+	public SCIP_CONSDATA getData(){
+		if(DIRECT_MEM)
+			return new SCIP_CONSDATA(this.getPointer().getPointer(3*d_sz));
+		else
+			return JSCIP.consGetData(this);
+	}
 	//SCIPconsGetNUses
 	public int getNUses(){ return JSCIP.consGetNUses(this); }
 	//SCIPconsIsDeleted

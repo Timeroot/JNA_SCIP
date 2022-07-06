@@ -9,15 +9,16 @@ public class Cons_LOP extends ConstraintData<Cons_LOP, Conshdlr_LOP> {
 	/* Member methods and data for per-constraint data. */
 	SCIP_VAR[][] vars;
 	Cons_LOP(SCIP_VAR[][] _vars, boolean copy) {
+		int n = _vars.length;
 		if(!copy) {
 			this.vars = _vars;
-			return;
-		}
-		//deep copy
-		int n = _vars.length;
-		vars = new SCIP_VAR[n][];
-		for(int i=0; i<n; i++) {
-			vars[i] = Arrays.copyOf(_vars[i], n);
+		} else {
+			//deep copy
+			
+			vars = new SCIP_VAR[n][];
+			for(int i=0; i<n; i++) {
+				vars[i] = Arrays.copyOf(_vars[i], n);
+			}
 		}
 	}
 	
@@ -27,14 +28,15 @@ public class Cons_LOP extends ConstraintData<Cons_LOP, Conshdlr_LOP> {
 		int nGen = 0;
 		boolean cutoff = false;
 		
-		int n = vars.length; 
+		int n = vars.length;
+		double[][] vals = scip.getSolVals(sol, vars);
 		
 		for(int i=0; i<n; i++) {
 			for(int j=i+1; j<n; j++) {
-	    		double valIJ = scip.getSolVal(sol, vars[i][j]);
-	    		double valJI = scip.getSolVal(sol, vars[j][i]);
+	    		double valIJ = vals[i][j];;
+	    		double valJI = vals[j][i];
 	    		
-				if ( Math.abs(valIJ + valJI - 1.0) > 1e-7 ) {
+				if ( !scip.isFeasEQ(scip, valIJ + valJI, 1.0) ) {
 					String name = "sym#"+i+"#"+j;
 					SCIP_ROW row = scip.createEmptyRowConshdlr(getScipHdlr(), name, 1.0, 1.0, false, false, true);
 					scip.cacheRowExtensions(row);
@@ -58,11 +60,11 @@ public class Cons_LOP extends ConstraintData<Cons_LOP, Conshdlr_LOP> {
 					if(k==j)
 						continue;
 					
-					double valJK = scip.getSolVal(sol, vars[j][k]);
-					double valKI = scip.getSolVal(sol, vars[k][i]);
+					double valJK = vals[j][k];
+					double valKI = vals[k][i];
 					double sum = valIJ + valJK + valKI;
 		    		
-					if ( sum > 2.0 ) {
+					if ( scip.isEfficacious(sum - 2.0) ) {
 						//build row
 						String name = "triangle#"+i+"#"+j+"#"+k;
 						SCIP_ROW row = scip.createEmptyRowConshdlr(getScipHdlr(), name, -scip.infinity(), 2.0, false, false, true);
@@ -92,6 +94,52 @@ public class Cons_LOP extends ConstraintData<Cons_LOP, Conshdlr_LOP> {
 			return SCIP_RESULT.SCIP_SEPARATED;
 		} else
 			return SCIP_RESULT.SCIP_DIDNOTFIND;
+	}
+	
+	boolean isFeasible_Integral(SCIP scip, SCIP_SOL sol, boolean printreason) {
+		int n = vars.length;
+		double[][] vals = scip.getSolVals(sol, vars);
+
+		/* check triangle inequalities and symmetry equations */
+		for(int i=0; i<n; i++) {
+			for(int j=i+1; j<n; j++) {
+				boolean oneIJ = vals[i][j] > 0.5;
+				boolean oneJI = vals[j][i] > 0.5;
+				
+				if ( oneIJ == oneJI ) {
+					scip.debugMsg("constraint <"+getName()+"> infeasible (violated equation).\n");
+					if( printreason ) {
+						scip.infoMessage(null,
+						"violation: symmetry equation violated <%s> = %.15g and <%s> = %.15g\n",
+						vars[i][j].getName(), scip.getSolVal(sol, vars[i][j]),
+						vars[j][i].getName(), scip.getSolVal(sol, vars[j][i]));
+					}
+					return false;
+				}
+				
+				for(int k=i+1; k<n; k++) {
+					if(k==j)
+						continue;
+					
+					boolean oneJK = vals[j][k] > 0.5;
+					boolean oneKI = vals[k][i] > 0.5;
+					
+					if (oneIJ && oneJK && oneKI) {
+						scip.debugMsg("constraint <"+getName()+"> infeasible (violated triangle ineq.).\n");
+						if( printreason ) {
+							scip.infoMessage(null,
+							"violation: triangle inequality violated <%s> = %.15g, <%s> = %.15g, <%s> = %.15g\n",
+							vars[i][j].getName(), scip.getSolVal(sol, vars[i][j]),
+							vars[j][k].getName(), scip.getSolVal(sol, vars[j][k]),
+							vars[k][i].getName(), scip.getSolVal(sol, vars[k][i]));
+						}
+						return false;
+					}
+				}
+			}
+		}
+		
+		return true;
 	}
 
 	@Override

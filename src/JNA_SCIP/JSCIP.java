@@ -1,8 +1,10 @@
 package JNA_SCIP;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.sun.jna.DefaultTypeMapper;
 import com.sun.jna.Library;
@@ -201,10 +203,11 @@ public interface JSCIP extends Library {
 			SCIP_VAR[] vars, double[] vals, double lhs, double rhs, boolean initial, boolean separate,
 			boolean enforce, boolean check, boolean propagate, boolean local, boolean modifiable,
 			boolean dynamic, boolean removable, boolean stickingatnode) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(cons.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateConsLinear(scip, pref, name, vars==null?0:vars.length, vars, vals, lhs, rhs, 
 				initial, separate, enforce, check, propagate, local, modifiable, dynamic, removable, stickingatnode);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		cons.setPointer(pref.getValue());
@@ -223,9 +226,10 @@ public interface JSCIP extends Library {
 			int nvars, SCIP_VAR[] vars, double[] vals, double lhs, double rhs);
 	static void CALL_SCIPcreateConsBasicLinear(SCIP scip, SCIP_CONS cons, String name,
 			SCIP_VAR[] vars, double[] vals, double lhs, double rhs) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(cons.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateConsBasicLinear(scip, pref, name, vars==null?0:vars.length, vars, vals, lhs, rhs);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		cons.setPointer(pref.getValue());
@@ -247,9 +251,10 @@ public interface JSCIP extends Library {
 	SCIP_RETCODE SCIPcreateConsBasicLogicor(SCIP scip, PointerByReference cons,
 			String name, int nvars, SCIP_VAR[] vars);
 	static void CALL_SCIPcreateConsBasicLogicor(SCIP scip, SCIP_CONS cons, String name, SCIP_VAR[] vars) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(cons.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateConsBasicLogicor(scip, pref, name, vars==null?0:vars.length, vars);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		cons.setPointer(pref.getValue());
@@ -265,9 +270,10 @@ public interface JSCIP extends Library {
 			String name, int nvars, SCIP_VAR[] vars);
 	static void CALL_SCIPcreateConsBasicSetcover(SCIP scip, SCIP_CONS cons, String name,
 			SCIP_VAR[] vars) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(cons.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateConsBasicSetcover(scip, pref, name, vars==null?0:vars.length, vars);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		cons.setPointer(pref.getValue());
@@ -283,9 +289,10 @@ public interface JSCIP extends Library {
 			Pointer ownercreate, Pointer ownercreatedata);
 	static void CALL_SCIPcreateExprVar(SCIP scip, SCIP_EXPR expr, SCIP_VAR var,
 			Pointer ownercreate, Pointer ownercreatedata) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(expr.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateExprVar(scip, pref, var, ownercreate, ownercreatedata);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		expr.setPointer(pref.getValue());
@@ -326,10 +333,11 @@ public interface JSCIP extends Library {
 			SCIP_DECL_MESSAGEINFO messageinfo,
 			SCIP_DECL_MESSAGEHDLRFREE messagehdlrfree,
 			SCIP_MESSAGEHDLRDATA messagehdlrdata) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(messagehdlr.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPmessagehdlrCreate(pref, bufferedoutput, filename, quiet,
 			messagewarning, messagedialog, messageinfo, messagehdlrfree, messagehdlrdata);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		messagehdlr.setPointer(pref.getValue());
@@ -532,8 +540,9 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPanalyzeConflict(SCIP scip, int validdepth, ByteByReference success);
 	static boolean CALL_SCIPanalyzeConflict(SCIP scip, int validdepth) {
-		ByteByReference bref = new ByteByReference();
+		ByteByReference bref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPanalyzeConflict(scip, validdepth, bref);
+		bbr.free(bref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return bref.getValue() != 0;
@@ -541,8 +550,9 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPanalyzeConflictCons(SCIP scip, SCIP_CONS cons, ByteByReference success);
 	static boolean CALL_SCIPanalyzeConflictCons(SCIP scip, SCIP_CONS cons) {
-		ByteByReference bref = new ByteByReference();
+		ByteByReference bref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPanalyzeConflictCons(scip, cons, bref);
+		bbr.free(bref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return bref.getValue() != 0;
@@ -567,10 +577,11 @@ public interface JSCIP extends Library {
 			SCIP_DECL_CONSLOCK conslock,
 			SCIP_CONSHDLRDATA conshdlrdata 
 		) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		SCIP_RETCODE ret = LIB.SCIPincludeConshdlrBasic(scip, pref, name, desc,
 				enfopriority, chckpriority, eagerfreq, needscons, consenfolp, consenfops,
 				conscheck, conslock, conshdlrdata);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return new SCIP_CONSHDLR(pref.getValue());
@@ -656,10 +667,11 @@ public interface JSCIP extends Library {
 			Pointer consdata, boolean initial, boolean separate, boolean enforce, boolean check,
 			boolean propagate, boolean local, boolean modifiable, boolean dynamic, boolean removable,
 			boolean stickingatnode) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(cons.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateCons(scip, pref, name, conshdlr, consdata, initial, separate,
 				enforce, check, propagate, local, modifiable, dynamic, removable, stickingatnode);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		cons.setPointer(pref.getValue());
@@ -683,9 +695,10 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPreleaseCons(SCIP scip, PointerByReference cons);
 	static void CALL_SCIPreleaseCons(SCIP scip, SCIP_CONS cons) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(cons.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPreleaseCons(scip, pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		//cons.setPointer(pref.getValue()); //always returns null
@@ -703,10 +716,12 @@ public interface JSCIP extends Library {
 		SCIP_HASHMAP varmap, SCIP_HASHMAP consmap, boolean global, ByteByReference success);
 	static SCIP_VAR CALL_SCIPgetVarCopy(SCIP sourcescip, SCIP targetscip, SCIP_VAR sourcevar,
 			SCIP_HASHMAP varmap, SCIP_HASHMAP consmap, boolean global) {
-		PointerByReference pref = new PointerByReference();
-		ByteByReference bref = new ByteByReference();
+		PointerByReference pref = pbr.get();
+		ByteByReference bref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPgetVarCopy(sourcescip, targetscip, sourcevar, pref, varmap,
 				consmap, global, bref);
+		pbr.free(pref);
+		bbr.free(bref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		boolean success = (bref.getValue() != 0);
@@ -725,8 +740,9 @@ public interface JSCIP extends Library {
 	SCIP_RETCODE SCIPaddRow(SCIP scip, SCIP_ROW row, boolean forcecut, ByteByReference infeasible);
 	//Returns true if the row rendered problem infeasible 
 	static boolean CALL_SCIPaddRow(SCIP scip, SCIP_ROW row, boolean forcecut) {
-		ByteByReference bref = new ByteByReference();
+		ByteByReference bref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPaddRow(scip, row, forcecut, bref);
+		bbr.free(bref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return bref.getValue() != 0;
@@ -745,6 +761,12 @@ public interface JSCIP extends Library {
 		return LIB.SCIPisCutEfficacious(scip, sol, cut);
 	}
 	
+	boolean SCIPisEfficacious(SCIP scip, double efficacy);
+	static boolean isEfficacious(SCIP scip, double efficacy) {
+		return LIB.SCIPisEfficacious(scip, efficacy);
+	}
+	/* END scip_cut.h */
+	
 	/* scip_dialog.h */
 	SCIP_RETCODE SCIPstartInteraction(SCIP scip);
 	static void CALL_SCIPstartInteraction(SCIP scip) {
@@ -757,9 +779,10 @@ public interface JSCIP extends Library {
 	/* scip_general.h */
 	SCIP_RETCODE SCIPcreate(PointerByReference scip);//SCIP_RETCODE
     static void CALL_SCIPcreate(SCIP scip) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
     	pref.setValue(scip.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreate(pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		scip.setPointer(pref.getValue());
@@ -767,9 +790,10 @@ public interface JSCIP extends Library {
     
     SCIP_RETCODE SCIPfree(PointerByReference scip);//SCIP_RETCODE
     static void CALL_SCIPfree(SCIP scip) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
     	pref.setValue(scip.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPfree(pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		scip.setPointer(pref.getValue()); //NOTE: always returns null
@@ -798,8 +822,9 @@ public interface JSCIP extends Library {
 
 	SCIP_RETCODE SCIPconstructLP(SCIP scip, ByteByReference cutoff);
 	static boolean CALL_SCIPconstructLP(SCIP scip) {
-		ByteByReference bref = new ByteByReference();
+		ByteByReference bref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPconstructLP(scip, bref);
+		bbr.free(bref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return bref.getValue() != 0;
@@ -830,8 +855,9 @@ public interface JSCIP extends Library {
 	static void CALL_SCIPcreateEmptyRowConshdlr(SCIP scip, SCIP_ROW row, SCIP_CONSHDLR conshdlr,
 			String name, double lhs, double rhs, boolean local, boolean modifiable,
 			boolean removable) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		SCIP_RETCODE ret = LIB.SCIPcreateEmptyRowConshdlr(scip, pref, conshdlr, name, lhs, rhs, local, modifiable, removable);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		row.setPointer(pref.getValue());
@@ -852,9 +878,10 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPreleaseRow(SCIP scip, PointerByReference row);
 	static void CALL_SCIPreleaseRow(SCIP scip, SCIP_ROW row) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(row.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPreleaseRow(scip, pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 //		row.setPointer(pref.getValue());//always returns null
@@ -913,10 +940,11 @@ public interface JSCIP extends Library {
 	static void CALL_SCIPincludeHeurBasic(SCIP scip, SCIP_HEUR scip_heur, String name, String desc,
 			byte dispchar, int priority, int freq, int freqofs, int maxdepth, SCIP_HEURTIMING timingmask,
 			boolean usessubscip, SCIP_DECL_HEUREXEC heurexec, SCIP_HEURDATA heurdata) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(scip_heur.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPincludeHeurBasic(scip, pref, name, desc, dispchar, priority, freq,
 				freqofs, maxdepth, timingmask, usessubscip, heurexec, heurdata);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		scip_heur.setPointer(pref.getValue());
@@ -930,7 +958,7 @@ public interface JSCIP extends Library {
 		return scip_heur;
 	}
 	
-	//TODO
+	//TODO make a wrapper class for these
 	SCIP_RETCODE SCIPsetHeurCopy(SCIP scip, SCIP_HEUR heur, SCIP_DECL_HEURCOPY heurcopy);
 	SCIP_RETCODE SCIPsetHeurFree(SCIP scip, SCIP_HEUR heur, SCIP_DECL_HEURFREE heurfree);
 	SCIP_RETCODE SCIPsetHeurInit(SCIP scip, SCIP_HEUR heur, SCIP_DECL_HEURINIT heurinit);
@@ -1007,6 +1035,52 @@ public interface JSCIP extends Library {
 	/* scip_numerics.h */
 	double SCIPinfinity(SCIP scip);
 	static double infinity(SCIP scip) { return LIB.SCIPinfinity(scip); }
+	
+	boolean SCIPisFeasEQ(SCIP scip, double x, double y);
+	static boolean isFeasEQ(SCIP scip, double x, double y) {
+		return LIB.SCIPisFeasEQ(scip, x, y);
+	}
+
+	boolean SCIPisFeasLT(SCIP scip, double x, double y);
+	static boolean isFeasLT(SCIP scip, double x, double y) {
+		return LIB.SCIPisFeasLT(scip, x, y);
+	}
+
+	boolean SCIPisFeasLE(SCIP scip, double x, double y);
+	static boolean isFeasLE(SCIP scip, double x, double y) {
+		return LIB.SCIPisFeasLE(scip, x, y);
+	}
+
+	boolean SCIPisFeasGT(SCIP scip, double x, double y);
+	static boolean isFeasGT(SCIP scip, double x, double y) {
+		return LIB.SCIPisFeasGT(scip, x, y);
+	}
+
+	boolean SCIPisFeasGE(SCIP scip, double x, double y);
+	static boolean isFeasGE(SCIP scip, double x, double y) {
+		return LIB.SCIPisFeasGE(scip, x, y);
+	}
+
+	boolean SCIPisFeasZero(SCIP scip, double x);
+	static boolean isFeasZero(SCIP scip, double x) {
+		return LIB.SCIPisFeasZero(scip, x);
+	}
+
+	boolean SCIPisFeasPositive(SCIP scip, double x);
+	static boolean isFeasPositive(SCIP scip, double x) {
+		return LIB.SCIPisFeasPositive(scip, x);
+	}
+
+	boolean SCIPisFeasNegative(SCIP scip, double x);
+	static boolean isFeasNegative(SCIP scip, double x) {
+		return LIB.SCIPisFeasNegative(scip, x);
+	}
+
+	boolean SCIPisFeasIntegral(SCIP scip, double x);
+	static boolean isFeasIntegral(SCIP scip, double x) {
+		return LIB.SCIPisFeasIntegral(scip, x);
+	}
+	/* END scip_numerics.h */
 	
 	/* scip_param.h */
 	SCIP_RETCODE SCIPsetRealParam(SCIP scip, String name, double value);
@@ -1138,8 +1212,9 @@ public interface JSCIP extends Library {
 			String name, String desc, String extensions, SCIP_READERDATA data);
 	static SCIP_READER CALL_SCIPincludeReaderBasic(SCIP scip, String name, String desc,
 			String extensions, SCIP_READERDATA data) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		SCIP_RETCODE ret = LIB.SCIPincludeReaderBasic(scip, pref, name, desc, extensions, data);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return new SCIP_READER(pref.getValue());
@@ -1211,6 +1286,13 @@ public interface JSCIP extends Library {
 		return LIB.SCIPgetSolVal(scip, sol, var);
 	}
 	
+	SCIP_RETCODE SCIPgetSolVals(SCIP scip, SCIP_SOL sol, int nvar, SCIP_VAR[] vars, double[] vals);
+	static void getSolVals(SCIP scip, SCIP_SOL sol, SCIP_VAR[] vars, double[] vals) {
+		SCIP_RETCODE ret = LIB.SCIPgetSolVals(scip, sol, vars.length, vars, vals);
+		if(ret != SCIP_OKAY)
+			throw new ScipException(ret);
+	}
+	
 	double SCIPgetSolOrigObj(SCIP scip, SCIP_SOL sol);
 	static double getSolOrigObj(SCIP scip, SCIP_SOL sol) {
 		return LIB.SCIPgetSolOrigObj(scip, sol);
@@ -1218,9 +1300,10 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPcreateSol(SCIP scip, PointerByReference sol, SCIP_HEUR heur);
 	static void CALL_SCIPcreateSol(SCIP scip, SCIP_SOL sol, SCIP_HEUR heur) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(sol.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateSol(scip, pref, heur);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		sol.setPointer(pref.getValue());
@@ -1233,9 +1316,10 @@ public interface JSCIP extends Library {
 
 	SCIP_RETCODE SCIPfreeSol(SCIP scip, PointerByReference sol);
 	static void CALL_SCIPfreeSol(SCIP scip, SCIP_SOL sol) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(sol.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPfreeSol(scip, pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 //		sol.setPointer(pref.getValue());//always returns null
@@ -1254,9 +1338,10 @@ public interface JSCIP extends Library {
 	//Returns true if solution was stored
 	static boolean CALL_SCIPtrySol(SCIP scip, SCIP_SOL sol, boolean printreason, boolean completely,
 			boolean checkbounds, boolean checkintegrality, boolean checklprows) {
-		ByteByReference bref = new ByteByReference();
+		ByteByReference bref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPtrySol(scip, sol, printreason, completely, checkbounds,
 				checkintegrality, checklprows, bref);
+		bbr.free(bref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return bref.getValue() != 0;
@@ -1315,10 +1400,11 @@ public interface JSCIP extends Library {
 			SCIP_DECL_VARDELTRANS vardeltrans,
 			SCIP_DECL_VARCOPY varcopy,
 			SCIP_VARDATA vardata) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(var.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateVar(scip, pref, name, lb, ub, obj, vartype, initial,
 				removable, vardelorig, vartrans, vardeltrans, varcopy, vardata);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		var.setPointer(pref.getValue());
@@ -1340,9 +1426,10 @@ public interface JSCIP extends Library {
 			double lb, double ub, double obj, SCIP_VARTYPE vartype);
 	static void CALL_SCIPcreateVarBasic(SCIP scip, SCIP_VAR var,
 			String name, double lb, double ub, double obj, SCIP_VARTYPE vartype) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(var.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPcreateVarBasic(scip, pref, name, lb, ub, obj, vartype);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		var.setPointer(pref.getValue());
@@ -1363,9 +1450,10 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPreleaseVar(SCIP scip, PointerByReference var);
 	static void CALL_SCIPreleaseVar(SCIP scip, SCIP_VAR var) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		pref.setValue(var.getPointer());
 		SCIP_RETCODE ret = LIB.SCIPreleaseVar(scip, pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 //		var.setPointer(pref.getValue()); //always return null
@@ -1373,8 +1461,9 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPgetTransformedVar(SCIP scip, SCIP_VAR var, PointerByReference transvar);
 	static SCIP_VAR CALL_SCIPgetTransformedVar(SCIP scip, SCIP_VAR var) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		SCIP_RETCODE ret = LIB.SCIPgetTransformedVar(scip, var, pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return new SCIP_VAR(pref.getValue());
@@ -1382,8 +1471,9 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPgetNegatedVar(SCIP scip, SCIP_VAR var, PointerByReference transvar);
 	static SCIP_VAR CALL_SCIPgetNegatedVar(SCIP scip, SCIP_VAR var) {
-		PointerByReference pref = new PointerByReference();
+		PointerByReference pref = pbr.get();
 		SCIP_RETCODE ret = LIB.SCIPgetTransformedVar(scip, var, pref);
+		pbr.free(pref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		return new SCIP_VAR(pref.getValue());
@@ -1470,9 +1560,11 @@ public interface JSCIP extends Library {
 			boolean force, ByteByReference infeasible, ByteByReference tightened);
 	static InferVarResult CALL_SCIPtightenVarLb(SCIP scip, SCIP_VAR var, double newbound,
 			boolean force) {
-		ByteByReference inf_ref = new ByteByReference();
-		ByteByReference tight_ref = new ByteByReference();
+		ByteByReference inf_ref = bbr.get();
+		ByteByReference tight_ref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPtightenVarLb(scip, var, newbound, force, inf_ref, tight_ref);
+		bbr.free(inf_ref);
+		bbr.free(tight_ref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		if(inf_ref.getValue() != 0)
@@ -1486,9 +1578,11 @@ public interface JSCIP extends Library {
 			boolean force, ByteByReference infeasible, ByteByReference tightened);
 	static InferVarResult CALL_SCIPtightenVarUb(SCIP scip, SCIP_VAR var, double newbound,
 			boolean force) {
-		ByteByReference inf_ref = new ByteByReference();
-		ByteByReference tight_ref = new ByteByReference();
+		ByteByReference inf_ref = bbr.get();
+		ByteByReference tight_ref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPtightenVarUb(scip, var, newbound, force, inf_ref, tight_ref);
+		bbr.free(inf_ref);
+		bbr.free(tight_ref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		if(inf_ref.getValue() != 0)
@@ -1502,10 +1596,12 @@ public interface JSCIP extends Library {
 			int inferinfo, boolean force, ByteByReference infeasible, ByteByReference tightened);
 	static InferVarResult CALL_SCIPinferVarFixCons(SCIP scip, SCIP_VAR var, double fixedval,
 			SCIP_CONS infercons, int inferinfo, boolean force) {
-		ByteByReference inf_ref = new ByteByReference();
-		ByteByReference tight_ref = new ByteByReference();
+		ByteByReference inf_ref = bbr.get();
+		ByteByReference tight_ref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPinferVarFixCons(scip, var, fixedval, infercons,
 				inferinfo, force, inf_ref, tight_ref);
+		bbr.free(inf_ref);
+		bbr.free(tight_ref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		if(inf_ref.getValue() != 0)
@@ -1519,10 +1615,12 @@ public interface JSCIP extends Library {
 			int inferinfo, boolean force, ByteByReference infeasible, ByteByReference tightened);
 	static InferVarResult CALL_SCIPinferVarLbCons(SCIP scip, SCIP_VAR var, double fixedval,
 			SCIP_CONS infercons, int inferinfo, boolean force) {
-		ByteByReference inf_ref = new ByteByReference();
-		ByteByReference tight_ref = new ByteByReference();
+		ByteByReference inf_ref = bbr.get();
+		ByteByReference tight_ref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPinferVarLbCons(scip, var, fixedval, infercons,
 				inferinfo, force, inf_ref, tight_ref);
+		bbr.free(inf_ref);
+		bbr.free(tight_ref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		if(inf_ref.getValue() != 0)
@@ -1536,10 +1634,12 @@ public interface JSCIP extends Library {
 			int inferinfo, boolean force, ByteByReference infeasible, ByteByReference tightened);
 	static InferVarResult CALL_SCIPinferVarUbCons(SCIP scip, SCIP_VAR var, double fixedval,
 			SCIP_CONS infercons, int inferinfo, boolean force) {
-		ByteByReference inf_ref = new ByteByReference();
-		ByteByReference tight_ref = new ByteByReference();
+		ByteByReference inf_ref = bbr.get();
+		ByteByReference tight_ref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPinferVarUbCons(scip, var, fixedval, infercons,
 				inferinfo, force, inf_ref, tight_ref);
+		bbr.free(inf_ref);
+		bbr.free(tight_ref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
 		if(inf_ref.getValue() != 0)
@@ -1551,18 +1651,23 @@ public interface JSCIP extends Library {
 	
 	SCIP_RETCODE SCIPinferBinvarCons(SCIP scip, SCIP_VAR var, boolean fixedval, SCIP_CONS infercons,
 			int inferinfo, ByteByReference infeasible, ByteByReference tightened);
+	
 	static InferVarResult CALL_SCIPinferBinvarCons(SCIP scip, SCIP_VAR var, boolean fixedval,
 			SCIP_CONS infercons, int inferinfo) {
-		ByteByReference inf_ref = new ByteByReference();
-		ByteByReference tight_ref = new ByteByReference();
+		ByteByReference inf_ref = bbr.get();
+		ByteByReference tight_ref = bbr.get();
 		SCIP_RETCODE ret = LIB.SCIPinferBinvarCons(scip, var, fixedval, infercons,
 				inferinfo, inf_ref, tight_ref);
+		bbr.free(inf_ref);
+		bbr.free(tight_ref);
 		if(ret != SCIP_OKAY)
 			throw new ScipException(ret);
-		if(inf_ref.getValue() != 0)
+		if(inf_ref.getValue() != 0) {
 			return InferVarResult.INFEASIBLE;
-		if(tight_ref.getValue() != 0)
+		}
+		if(tight_ref.getValue() != 0) {
 			return InferVarResult.TIGHTENED;
+		}
 		return InferVarResult.UNCHNAGED;
 	}
 	
@@ -1580,4 +1685,56 @@ public interface JSCIP extends Library {
 	static SCIP_SET SCIPset(SCIP scip) {
 		return new SCIP_SET(scip.getPointer().getPointer(8));
 	}
+	
+	//Since these calls regularly require allocating new ByteByReference and PointerByReference
+	//objects, this can actually make simple things substantially more expensive. We can't keep a
+	//fixed one per method, because Java might call SCIP might call a callback ... and use the same
+	//object. It's rare, but happens. So instead we keep a little pool of them for use, since it's rare
+	//that we'll need more than 3 or 4 at a time.
+	class SimplePool<T> {
+		private ArrayList<T> free = new ArrayList<>();
+		private Supplier<T> constructor;
+
+		//useful for debugging
+		private static final boolean TRACK_USED = true;
+		private ArrayList<T> used = new ArrayList<>();
+		
+		public SimplePool(Supplier<T> supp){
+			constructor = supp;
+		}
+		T get() {
+			T t;
+			if(free.size() > 0)
+				t = free.remove(free.size()-1);
+			else
+				t = constructor.get();
+			if(TRACK_USED) {
+				used.add(t);
+			}
+			return t;
+		}
+		void free(T t) {
+			if(TRACK_USED) {
+				if(!used.remove(t))
+					throw new RuntimeException("Freed when not used");
+				if(free.contains(t))
+					throw new RuntimeException("Doubly freed");
+			}
+			free.add(t);
+		}
+		@Override
+		public String toString() {
+			String t = free.size() == 0 ? "?" : free.get(0).getClass().toString();
+			String used_str = TRACK_USED ? ",used="+used.size() : "";
+			return "SimplePool[n="+free.size()+used_str+",t="+t+"]";
+		}
+		@Override
+		public void finalize() {
+			if(used.size() > 0) {
+				throw new RuntimeException("Warning: Pool closed while pointers in use");
+			}
+		}
+	}
+	static SimplePool<ByteByReference> bbr = new SimplePool<>(ByteByReference::new);
+	static SimplePool<PointerByReference> pbr = new SimplePool<>(PointerByReference::new);
 }

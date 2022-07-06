@@ -42,6 +42,20 @@ need `libscip.so` where JNA can find it. Your working directory should work,
 but you can also set the system property `jna.library.path`, or [a few other
 options listed here](https://java-native-access.github.io/jna/4.2.1/com/sun/jna/NativeLibrary.html#library_search_paths).
 
+## Examples
+
+JNA\_SCIP currently has 5 example programs:
+ * Simple\_MILP, which solves a two-variable MILP.
+ * Queens, a translation of SCIP's n-Queens problem.
+   * Queens_C is a 1-to-1 translation of the C.
+   * Queens_Obj is showing how to refer to variable names in a somewhat more Java way.
+ * Heuristic, which shows how to implement a SCIP_HEUR callback.
+ * Conshdlr, which shows how to implement a constraint handler callback.
+   * Conshdlr_Manual gives the callbacks to SCIP directly.
+   * Conshdlr_Obj uses JNA\_SCIP's helper classes (ConstraintHandler) to make the management easier.
+ * LOP, a translation of SCIP's Linear Ordering Problem solver. It includes a constraint
+   handler and a problem reader, and uses JNA\_SCIP's ConstraintHandler structures.
+
 ## How to find a function
 
 Alright, you have a SCIP function with a certain name, and you want to know
