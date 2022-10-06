@@ -4,7 +4,7 @@ import com.sun.jna.FromNativeContext;
 import com.sun.jna.ToNativeContext;
 import com.sun.jna.TypeConverter;
 
-public class SCIP_HEURTIMING {
+public final class SCIP_HEURTIMING {
 	/* This actually an int defined by flags, and there are are 2048 possible values. We could enumerate them all,
 	 * or use ints (leaving code largely unreadable). Instead we'll just make a (non-enum) class.
 	 */
@@ -26,6 +26,18 @@ public class SCIP_HEURTIMING {
 	}
 	public SCIP_HEURTIMING or(SCIP_HEURTIMING other) {
 		return of(this.flags | other.flags);
+	}
+	public boolean matches(SCIP_HEURTIMING other) {
+		return (this.flags & other.flags) != 0;
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return (other instanceof SCIP_HEURTIMING) && (this.flags == ((SCIP_HEURTIMING)other).flags);
+	}
+	@Override
+	public int hashCode() {
+		return flags + Integer.rotateRight(0x10010110 * flags, 16); 
 	}
 	public String toString() {return "HEURTIMING{"+flags+"}";}
 	

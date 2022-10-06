@@ -18,6 +18,8 @@ public class SCIP_CONSHDLR extends PointerType {
 	public String getDesc(){ return JSCIP.conshdlrGetDesc(this); }
 	//SCIPconshdlrGetData
 	public SCIP_CONSHDLRDATA getData(){ return JSCIP.conshdlrGetData(this); }
+	//SCIPgetConss
+	public SCIP_CONS[] getConss(){ return JSCIP.conshdlrGetConss(this); }
 	//SCIPconshdlrGetSetupTime
 	public double getSetupTime(){ return JSCIP.conshdlrGetSetupTime(this); }
 	//SCIPconshdlrGetPresolTime

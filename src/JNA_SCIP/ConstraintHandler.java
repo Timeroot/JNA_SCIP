@@ -36,6 +36,8 @@ public abstract class ConstraintHandler<Data extends ConstraintData<Data,Self>,S
 	private SCIP_DECL_CONSEXIT		consexit = this::consexit;
 	private SCIP_DECL_CONSPROP		consprop = this::consprop;
 	private SCIP_DECL_CONSRESPROP	consresprop = this::consresprop;
+	private SCIP_DECL_CONSACTIVE	consactive = this::consactive;
+	private SCIP_DECL_CONSDEACTIVE	consdeactive = this::consdeactive;
 	private SCIP_DECL_CONSENFORELAX	consenforelax = this::consenforelax;
 	private SCIP_DECL_CONSCOPY 		conscopy = this::conscopy;
 	private SCIP_DECL_CONSHDLRCOPY	conshdlrcopy = this::conshdlrcopy;
@@ -75,9 +77,17 @@ public abstract class ConstraintHandler<Data extends ConstraintData<Data,Self>,S
 	public static ConstraintHandler<?,?> findJavaConshdlr(SCIP_CONSHDLR conshdlr) {
 		return hdlr_mapping.get(conshdlr);
 	}
+	
 	public SCIP_CONSHDLR findScipConshdlr(SCIP scip) {
 		return scip.findConshdlr(this.name);
 	}
+	public Data getJavaCons(SCIP_CONS cons) {
+		return cons_mapping.get(cons);
+	}
+	public SCIP_CONSHDLR getScipConshdlr() {
+		return conshdlr;
+	}
+	
 	//If we're in a subscip, go the right one to work in
 	@SuppressWarnings("unchecked")
 	public Self findTrueHdlr(SCIP scip) {
@@ -154,6 +164,20 @@ public abstract class ConstraintHandler<Data extends ConstraintData<Data,Self>,S
 	public void disableConsResprop(SCIP scip) {
 		//null methods means "disable".
 		scip.setConshdlrResprop(conshdlr, null);
+	}
+	public void enableConsActive(SCIP scip) {
+		scip.setConshdlrActive(conshdlr, consactive);
+	}
+	public void disableConsActive(SCIP scip) {
+		//null methods means "disable".
+		scip.setConshdlrActive(conshdlr, null);
+	}
+	public void enableConsDective(SCIP scip) {
+		scip.setConshdlrDective(conshdlr, consdeactive);
+	}
+	public void disableConsDective(SCIP scip) {
+		//null methods means "disable".
+		scip.setConshdlrDective(conshdlr, null);
 	}
 	//Can't be disabled afterwards.
 	public void enableConsEnforelax(SCIP scip) {
@@ -576,5 +600,47 @@ public abstract class ConstraintHandler<Data extends ConstraintData<Data,Self>,S
 			return SCIP_ERROR;
 		}	
 		return SCIP_OKAY;
+	}
+	
+	//CONSACTIVE
+	protected void consactive(SCIP scip, Data cons) {
+		throw new RuntimeException("consactive was enabled but you didn't override the default implementation.");
+	}
+	
+	public SCIP_RETCODE consactive(SCIP scip, SCIP_CONSHDLR conshdlr, SCIP_CONS scip_cons) {
+		//Sanity check on conshdlr
+		if(!conshdlr.equals(this.conshdlr)) {
+			System.err.println("Unexpected conshdlr "+conshdlr);
+			return SCIP_INVALIDDATA;
+		}
+		try {
+			Data cons = cons_mapping.get(scip_cons);
+			consactive(scip, cons);
+			return SCIP_OKAY;
+		} catch(RuntimeException e) {
+			e.printStackTrace();
+			return SCIP_NOTIMPLEMENTED;
+		}
+	}
+
+	//CONSDEACTIVE
+	protected void consdeactive(SCIP scip, Data cons) {
+		throw new RuntimeException("consdeactive was enabled but you didn't override the default implementation.");
+	}
+	
+	public SCIP_RETCODE consdeactive(SCIP scip, SCIP_CONSHDLR conshdlr, SCIP_CONS scip_cons) {
+		//Sanity check on conshdlr
+		if(!conshdlr.equals(this.conshdlr)) {
+			System.err.println("Unexpected conshdlr "+conshdlr);
+			return SCIP_INVALIDDATA;
+		}
+		try {
+			Data cons = cons_mapping.get(scip_cons);
+			consdeactive(scip, cons);
+			return SCIP_OKAY;
+		} catch(RuntimeException e) {
+			e.printStackTrace();
+			return SCIP_NOTIMPLEMENTED;
+		}
 	}
 }

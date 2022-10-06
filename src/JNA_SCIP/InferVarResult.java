@@ -6,13 +6,13 @@ package JNA_SCIP;
 //boolean. Since infeasible implies tightened (a domain can't
 //shrink to empty unless it tightened) we have three options. 
 public enum InferVarResult {
-	UNCHNAGED, //neither tightened nor feasible
+	UNCHANGED, //neither tightened nor feasible
 	TIGHTENED, //but still feasible
 	INFEASIBLE; //implies tightened
 	
 	//to compute the two underlying fields
 	public boolean tightened() {
-		return this != UNCHNAGED;
+		return this != UNCHANGED;
 	}
 	public boolean infeasible() {
 		return this == INFEASIBLE;

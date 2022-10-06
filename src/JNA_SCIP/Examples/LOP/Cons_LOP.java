@@ -36,7 +36,7 @@ public class Cons_LOP extends ConstraintData<Cons_LOP, Conshdlr_LOP> {
 	    		double valIJ = vals[i][j];;
 	    		double valJI = vals[j][i];
 	    		
-				if ( !scip.isFeasEQ(scip, valIJ + valJI, 1.0) ) {
+				if ( !scip.isFeasEQ(valIJ + valJI, 1.0) ) {
 					String name = "sym#"+i+"#"+j;
 					SCIP_ROW row = scip.createEmptyRowConshdlr(getScipHdlr(), name, 1.0, 1.0, false, false, true);
 					scip.cacheRowExtensions(row);

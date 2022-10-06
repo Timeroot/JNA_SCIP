@@ -30,6 +30,8 @@ public class SCIP_VAR extends PointerType {
 	}
 	//SCIPvarGetNUses
 	public int getNUses() { return JSCIP.varGetNUses(this); }
+	//SCIPvarSetTransData
+	public void setTransData(SCIP_DECL_VARTRANS vartrans) { JSCIP.varSetTransData(this, vartrans); }
 	//SCIPvarGetType
 	public SCIP_VARTYPE getType() { return JSCIP.varGetType(this); }
 	//SCIPvarGetStatus
@@ -37,7 +39,7 @@ public class SCIP_VAR extends PointerType {
 	//SCIPvarGetObj
 	public double getObj() {
 		if(DIRECT_MEM)
-			return this.getPointer().getDouble(8*0);
+			return this.getPointer().getDouble(0);
 		else
 			return JSCIP.varGetObj(this);
 	}

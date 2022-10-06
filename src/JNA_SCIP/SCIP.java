@@ -23,6 +23,16 @@ public final class SCIP extends PointerType {
     	return scip;
     }
 
+    //"Member" methods -- most of the SCIP library!
+    
+    /* cons_knapsack.h */
+    public SCIP_CONS createConsBasicKnapsack(String name, int nvars, SCIP_VAR[] vars,
+			long[] weights, long capacity) {
+    	return JSCIP.createConsBasicKnapsack(this, name, nvars, vars, weights, capacity);
+    }
+    /* END cons_knapsack.h */
+    
+    /* cons_linear.h */
 	//SCIPcreateConsLinear
 	public SCIP_CONS createConsLinear(String name, SCIP_VAR[] vars, double[] vals, double lhs, double rhs,
 			boolean initial, boolean separate, boolean enforce, boolean check, boolean propagate, boolean local,
@@ -42,10 +52,33 @@ public final class SCIP extends PointerType {
 	public SCIP_CONS createConsBasicLogicor(String name, SCIP_VAR[] vars) {
 		return JSCIP.createConsBasicLogicor(this, name, vars);
 	}
+	
+	/* cons_setppc.h */
 	//SCIPcreateConsBasicSetcover
 	public SCIP_CONS createConsBasicSetcover(String name, SCIP_VAR[] vars) {
 		return JSCIP.createConsBasicSetcover(this, name, vars);
 	}
+	//SCIPaddCoefSetppc
+	public void addCoefSetppc(SCIP_CONS cons, SCIP_VAR var) {
+		JSCIP.CALL_SCIPaddCoefSetppc(this, cons, var);
+	}
+	//SCIPgetDualsolSetppc
+	public double getDualsolSetppc(SCIP_CONS cons) {
+		return JSCIP.getDualsolSetppc(this, cons);
+	}
+	//SCIPgetNFixedonesSetppc
+	public double getNFixedonesSetppc(SCIP_CONS cons) {
+		return JSCIP.getNFixedonesSetppc(this, cons);
+	}
+	/* END cons_setppc.h */
+	
+	/* cons_varbound.h */
+	public SCIP_CONS createConsBasicVarbound(String name, SCIP_VAR var, SCIP_VAR vbdvar, double vbdcoef,
+			double lhs, double rhs) {
+		return JSCIP.createConsBasicVarbound(this, name, var, vbdvar, vbdcoef, lhs, rhs);
+	}
+	/* END cons_varbound.h */
+	
 	//SCIPcreateExprVar
 	public SCIP_EXPR createExprVar(SCIP_VAR var, Pointer ownercreate, Pointer ownercreatedata) {
 		return JSCIP.createExprVar(this, var, ownercreate, ownercreatedata);
@@ -62,6 +95,27 @@ public final class SCIP extends PointerType {
 	public void processShellArguments(String[] argv, String settings) {
 		JSCIP.CALL_SCIPprocessShellArguments(this, argv, settings);
 	}
+	/* END scipshell.h */
+	
+	/* scip_branch.h */
+	//SCIPincludeBranchruleBasic
+	public SCIP_BRANCHRULE includeBranchruleBasic(String name,
+			String desc, int priority, int maxdepth, double maxbounddist,
+			SCIP_BRANCHRULEDATA branchruledata) {
+		return JSCIP.CALL_SCIPincludeBranchruleBasic(this, name, desc, priority, maxdepth,
+				maxbounddist, branchruledata);
+	}
+	//SCIPsetBranchruleExecLp
+	public void setBranchruleExecLp(SCIP_BRANCHRULE branchrule, SCIP_DECL_BRANCHEXECLP branchexeclp) {
+		JSCIP.CALL_SCIPsetBranchruleExecLp(this, branchrule, branchexeclp);
+	}
+	//SCIPcreateChild
+	public SCIP_NODE createChild(double nodeselprio, double estimate) {
+		return JSCIP.CALL_SCIPcreateChild(this, nodeselprio, estimate);
+	}
+	//SCIPgetLPBranchCands
+	public LPBranchCands getLPBranchCands() { return JSCIP.CALL_SCIPgetLPBranchCands(this); }
+	/* END scip_branch.h */
 	
 	/* scip_conflict.h */
 	//SCIPinitConflictAnalysis
@@ -88,6 +142,7 @@ public final class SCIP extends PointerType {
 	public boolean analyzeConflictCons(SCIP_CONS cons) {
 		return JSCIP.CALL_SCIPanalyzeConflictCons(this, cons);
 	}
+	/* END scip_conflict.h */
 	
 	/* scip_cons.h */
 	//SCIPincludeConshdlrBasic
@@ -135,6 +190,14 @@ public final class SCIP extends PointerType {
 	public void setConshdlrResprop(SCIP_CONSHDLR conshdlr, SCIP_DECL_CONSRESPROP consresprop) {
 		JSCIP.CALL_SCIPsetConshdlrResprop(this, conshdlr, consresprop);
 	}
+	//SCIPsetConshdlrActive
+	public void setConshdlrActive(SCIP_CONSHDLR conshdlr, SCIP_DECL_CONSACTIVE consactive) {
+		JSCIP.CALL_SCIPsetConshdlrActive(this, conshdlr, consactive);
+	}
+	//SCIPsetConshdlrDective
+	public void setConshdlrDective(SCIP_CONSHDLR conshdlr, SCIP_DECL_CONSDEACTIVE consdeactive) {
+		JSCIP.CALL_SCIPsetConshdlrDeactive(this, conshdlr, consdeactive);
+	}
 	//SCIPsetConshdlrDelete
 	public void setConshdlrDelete(SCIP_CONSHDLR conshdlr, SCIP_DECL_CONSDELETE consDelete) {
 		JSCIP.CALL_SCIPsetConshdlrDelete(this, conshdlr, consDelete);
@@ -147,8 +210,6 @@ public final class SCIP extends PointerType {
 	public SCIP_CONSHDLR findConshdlr(String name) {
 		return JSCIP.findConshdlr(this, name);
 	}
-	
-	/* scip_cons.h */
 	//SCIPcreateCons
 	public SCIP_CONS createCons(String name, SCIP_CONSHDLR conshdlr,
 			Pointer consdata, boolean initial, boolean separate, boolean enforce, boolean check,
@@ -161,9 +222,23 @@ public final class SCIP extends PointerType {
 	public void captureCons(SCIP_CONS cons) { JSCIP.CALL_SCIPcaptureCons(this, cons); }
 	//SCIPreleaseCons
 	public void releaseCons(SCIP_CONS cons) { JSCIP.CALL_SCIPreleaseCons(this, cons); }
+	//SCIPsetConsInitial
+	public void setConsInitial(SCIP_CONS cons, boolean bool) { JSCIP.CALL_SCIPsetConsInitial(this, cons, bool); }
+	//SCIPsetConsLocal
+	public void setConsLocal(SCIP_CONS cons, boolean bool) { JSCIP.CALL_SCIPsetConsLocal(this, cons, bool); }
+	//SCIPsetConsModifiable
+	public void setConsModifiable(SCIP_CONS cons, boolean bool) { JSCIP.CALL_SCIPsetConsModifiable(this, cons, bool); }
+	//SCIPsetConsDynamic
+	public void setConsDynamic(SCIP_CONS cons, boolean bool) { JSCIP.CALL_SCIPsetConsDynamic(this, cons, bool); }
+	//SCIPsetConsRemovable
+	public void setConsRemovable(SCIP_CONS cons, boolean bool) { JSCIP.CALL_SCIPsetConsRemovable(this, cons, bool); }
+	//SCIPgetTransformedCons
+	public SCIP_CONS getTransformedCons(SCIP_CONS cons) { return JSCIP.CALL_SCIPgetTransformedCons(this, cons); }
+	/* END scip_cons.h */
 	
 	/* scip_copy.h */
 	public int getSubscipDepth() { return JSCIP.getSubscipDepth(this); }
+	/* END scip_copy.h */
 	
 	/* scip_cut.h */
 	//SCIPaddRow
@@ -194,7 +269,28 @@ public final class SCIP extends PointerType {
 	//SCIPgetStatus
 	public SCIP_STATUS getStatus() { return JSCIP.getStatus(this); }
 	//SCIPisTransformed
-	public boolean isTransformed() { return JSCIP.isTransformed(this); } 
+	public boolean isTransformed() { return JSCIP.isTransformed(this); }
+	/* END scip_dialog.h */
+	
+	/* scip_event.h */
+	//SCIPincludeEventhdlrBasic
+	public SCIP_EVENTHDLR includeEventhdlrBasic(String name,
+			String desc, SCIP_DECL_EVENTEXEC eventexec, SCIP_EVENTHDLRDATA data) {
+		return JSCIP.includeEventhdlrBasic(this, name, desc, eventexec, data);
+	}
+	//SCIPfindEventhdlr
+	public SCIP_EVENTHDLR findEventhdlr(String name) { return JSCIP.findEventhdlr(this, name); }
+	//SCIPcatchEvent
+	public int catchEvent(SCIP_EVENTTYPE eventtype, SCIP_EVENTHDLR eventhdlr,
+			SCIP_EVENTDATA data) {
+		return JSCIP.CALL_SCIPcatchEvent(this, eventtype, eventhdlr, data);
+	}
+	//SCIPdropEvent
+	public void dropEvent(SCIP_EVENTTYPE eventtype, SCIP_EVENTHDLR eventhdlr,
+			SCIP_EVENTDATA data, int filterpos) {
+		JSCIP.CALL_SCIPdropEvent(this, eventtype, eventhdlr, data, filterpos);
+	}
+	/* END scip_event.h */
 	
 	/* scip_lp.h */
 	//SCIPhasCurrentNodeLP
@@ -296,23 +392,23 @@ public final class SCIP extends PointerType {
 	
 	//TODO: improve performance on comparison calls with direct memory mapping.
 	//SCIPisFeasEQ
-	public boolean isFeasEQ(SCIP scip, double x, double y) { return JSCIP.isFeasEQ(scip, x, y); }
+	public boolean isFeasEQ(double x, double y) { return JSCIP.isFeasEQ(this, x, y); }
 	//SCIPisFeasLT
-	public boolean isFeasLT(SCIP scip, double x, double y) { return JSCIP.isFeasLT(scip, x, y); }
+	public boolean isFeasLT(double x, double y) { return JSCIP.isFeasLT(this, x, y); }
 	//SCIPisFeasLE
-	public boolean isFeasLE(SCIP scip, double x, double y) { return JSCIP.isFeasLE(scip, x, y); }
+	public boolean isFeasLE(double x, double y) { return JSCIP.isFeasLE(this, x, y); }
 	//SCIPisFeasGT
-	public boolean isFeasGT(SCIP scip, double x, double y) { return JSCIP.isFeasGT(scip, x, y); }
+	public boolean isFeasGT(double x, double y) { return JSCIP.isFeasGT(this, x, y); }
 	//SCIPisFeasGE
-	public boolean isFeasGE(SCIP scip, double x, double y) { return JSCIP.isFeasGE(scip, x, y); }
+	public boolean isFeasGE(double x, double y) { return JSCIP.isFeasGE(this, x, y); }
 	//SCIPisFeasZero
-	public boolean isFeasZero(SCIP scip, double x) { return JSCIP.isFeasZero(scip, x); }
+	public boolean isFeasZero(double x) { return JSCIP.isFeasZero(this, x); }
 	//SCIPisFeasPositive
-	public boolean isFeasPositive(SCIP scip, double x) { return JSCIP.isFeasPositive(scip, x); }
+	public boolean isFeasPositive(double x) { return JSCIP.isFeasPositive(this, x); }
 	//SCIPisFeasNegative
-	public boolean isFeasNegative(SCIP scip, double x) { return JSCIP.isFeasNegative(scip, x); }
+	public boolean isFeasNegative(double x) { return JSCIP.isFeasNegative(this, x); }
 	//SCIPisFeasIntegral
-	public boolean isFeasIntegral(SCIP scip, double x) { return JSCIP.isFeasIntegral(scip, x); }
+	public boolean isFeasIntegral(double x) { return JSCIP.isFeasIntegral(this, x); }
 	/* END scip_numerics.h */
 	
 	/* scip_param.h */
@@ -329,13 +425,77 @@ public final class SCIP extends PointerType {
 	//SCIPsetStringParam
 	public void setStringParam(String name, String value) { JSCIP.CALL_SCIPsetStringParam(this, name, value); }
 	//SCIPsetEmphasis
-	public void setEmphasis(SCIP_PARAMEMPHASIS emph, boolean quiet) {
-		JSCIP.CALL_SCIPsetEmphasis(this, emph, quiet);
-	}
+	public void setEmphasis(SCIP_PARAMEMPHASIS emph, boolean quiet) { JSCIP.CALL_SCIPsetEmphasis(this, emph, quiet); }
+	//SCIPsetHeuristics
+	public void setHeuristics(SCIP_PARAMSETTING emph, boolean quiet) { JSCIP.CALL_SCIPsetHeuristics(this, emph, quiet); }
 	//SCIPsetPresolving
-	public void setPresolving(SCIP_PARAMSETTING emph, boolean quiet) {
-		JSCIP.CALL_SCIPsetPresolving(this, emph, quiet);
+	public void setPresolving(SCIP_PARAMSETTING emph, boolean quiet) { JSCIP.CALL_SCIPsetPresolving(this, emph, quiet);	}
+	//SCIPsetSeparating
+	public void setSeparating(SCIP_PARAMSETTING emph, boolean quiet) { JSCIP.CALL_SCIPsetSeparating(this, emph, quiet);	}
+	/* END scip_param.h */
+	
+	/* scip_pricer.h */
+	//SCIPincludePricer
+	public void includePricer(
+			String name, String desc, int priority, boolean delay,
+			   SCIP_DECL_PRICERCOPY  pricercopy,
+			   SCIP_DECL_PRICERFREE  pricerfree,
+			   SCIP_DECL_PRICERINIT  pricerinit,
+			   SCIP_DECL_PRICEREXIT  pricerexit,
+			   SCIP_DECL_PRICERINITSOL pricerinitsol,
+			   SCIP_DECL_PRICEREXITSOL pricerexitsol,
+			   SCIP_DECL_PRICERREDCOST pricerredcost,
+			   SCIP_DECL_PRICERFARKAS pricerfarkas,
+			   SCIP_PRICERDATA  pricerdata
+		) {
+		JSCIP.CALL_SCIPincludePricer(this, name, desc, priority, delay, pricercopy, pricerfree,
+				pricerinit, pricerexit, pricerinitsol, pricerexitsol, pricerredcost, pricerfarkas,
+				pricerdata);
 	}
+	
+	//SCIPincludePricerBasic
+	public SCIP_PRICER includePricerBasic(
+			String name, String desc,
+			int priority, boolean delay,
+			   SCIP_DECL_PRICERREDCOST pricerredcost,
+			   SCIP_DECL_PRICERFARKAS pricerfarkas,
+			   SCIP_PRICERDATA  pricerdata
+		) {
+		return JSCIP.CALL_SCIPincludePricerBasic(this, name, desc, priority, delay, pricerredcost,
+				pricerfarkas, pricerdata);
+	}
+	
+	//SCIPsetPricerCopy
+	public void setPricerCopy(SCIP_PRICER pricer, SCIP_DECL_PRICERCOPY pricercopy) {
+		JSCIP.CALL_SCIPsetPricerCopy(this, pricer, pricercopy);
+	}
+	//SCIPsetPricerFree
+	public void setPricerFree(SCIP_PRICER pricer, SCIP_DECL_PRICERFREE pricerfree) {
+		JSCIP.CALL_SCIPsetPricerFree(this, pricer, pricerfree);
+	}
+	//SCIPsetPricerInit
+	public void setPricerInit(SCIP_PRICER pricer, SCIP_DECL_PRICERINIT pricerinit) {
+		JSCIP.CALL_SCIPsetPricerInit(this, pricer, pricerinit);
+	}
+	//SCIPsetPricerExit
+	public void setPricerExit(SCIP_PRICER pricer, SCIP_DECL_PRICEREXIT pricerexit) {
+		JSCIP.CALL_SCIPsetPricerExit(this, pricer, pricerexit);
+	}
+	//SCIPsetPricerInitsol
+	public void setPricerInitsol(SCIP_PRICER pricer, SCIP_DECL_PRICERINITSOL pricerinitsol) {
+		JSCIP.CALL_SCIPsetPricerInitsol(this, pricer, pricerinitsol);
+	}
+	//SCIPsetPricerExitsol
+	public void setPricerExitsol(SCIP_PRICER pricer, SCIP_DECL_PRICEREXITSOL pricerexitsol) {
+		JSCIP.CALL_SCIPsetPricerExitsol(this, pricer, pricerexitsol);
+	}
+	//SCIPfindPricer
+	public SCIP_PRICER findPricer(String name) { return JSCIP.findPricer(this, name); }
+	//SCIPactivatePricer
+	public void activatePricer(SCIP_PRICER pricer) { JSCIP.CALL_SCIPactivatePricer(this, pricer); }
+	/* END scip_pricer.h */
+	
+	/* scip_prob.h */
 	//SCIPcreateProb
 	public void createProb(String name,
 			SCIP_DECL_PROBDELORIG probdelorig,
@@ -352,6 +512,30 @@ public final class SCIP extends PointerType {
 	public void createProbBasic(String name) {
 		JSCIP.CALL_SCIPcreateProbBasic(this, name);
 	}
+	//SCIPsetProbDelorig
+	public void setProbDelorig(SCIP_DECL_PROBDELORIG method) {
+		JSCIP.CALL_SCIPsetProbDelorig(this, method);
+	}
+	//SCIPsetProbTrans
+	public void setProbTrans(SCIP_DECL_PROBTRANS method) {
+		JSCIP.CALL_SCIPsetProbTrans(this, method);
+	}
+	//SCIPsetProbDeltrans
+	public void setProbDeltrans(SCIP_DECL_PROBDELTRANS method) {
+		JSCIP.CALL_SCIPsetProbDeltrans(this, method);
+	}
+	//SCIPsetProbExitsol
+	public void setProbInitsol(SCIP_DECL_PROBINITSOL method) {
+		JSCIP.CALL_SCIPsetProbInitsol(this, method);
+	}
+	//SCIPsetProbExitsol
+	public void setProbExitsol(SCIP_DECL_PROBEXITSOL method) {
+		JSCIP.CALL_SCIPsetProbExitsol(this, method);
+	}
+	//SCIPsetProbCopy
+	public void setProbCopy(SCIP_DECL_PROBCOPY method) {
+		JSCIP.CALL_SCIPsetProbCopy(this, method);
+	}
 	//SCIPreadProb
 	public void readProb(String filename, String ext) {
 		JSCIP.CALL_SCIPreadProb(this, filename, ext);
@@ -359,14 +543,32 @@ public final class SCIP extends PointerType {
 	//SCIPfreeProb
 	public void freeProb() { JSCIP.CALL_SCIPfreeProb(this); }
 	//SCIPsetObjsense
-	public void setObjsense(SCIP_OBJSENSE objsense) {
-		JSCIP.CALL_SCIPsetObjsense(this, objsense);
-	}
-	
+	public void setObjsense(SCIP_OBJSENSE objsense) { JSCIP.CALL_SCIPsetObjsense(this, objsense); }
+	//SCIPsetObjIntegral
+	public void setObjIntegral() { JSCIP.CALL_SCIPsetObjIntegral(this); }
+	//SCIPisObjIntegral
+	public boolean isObjIntegral() { return JSCIP.isObjIntegral(this); }
 	//SCIPaddVar
 	public void addVar(SCIP_VAR var) { JSCIP.CALL_SCIPaddVar(this, var); }
+	//SCIPaddPricedVar
+	public void addPricedVar(SCIP_VAR var, double score) { JSCIP.CALL_SCIPaddPricedVar(this, var, score); }
+	//SCIPgetVars
+	public SCIP_VAR[] getVars() { return JSCIP.CALL_SCIPgetVars(this); }
+	//SCIPgetNVars
+	public int getNVars() { return JSCIP.getNVars(this); }
 	//SCIPaddCons
 	public void addCons(SCIP_CONS cons) { JSCIP.CALL_SCIPaddCons(this, cons); }
+	//SCIPgetLocalTransEstimate
+	public double getLocalTransEstimate() { return JSCIP.getLocalTransEstimate(this); }
+	//SCIPaddConsNode
+	public void addConsNode(SCIP_NODE node, SCIP_CONS cons, SCIP_NODE validnode) {
+		JSCIP.CALL_SCIPaddConsNode(this, node, cons, validnode);
+	}
+	//SCIPdelConsLocal
+	public void delConsLocal(SCIP_CONS cons) {
+		JSCIP.CALL_SCIPdelConsLocal(this, cons);
+	}
+	/* END scip_prob.h */
 	
 	/* scip_reader.h */
 	//SCIPincludeReaderBasic
@@ -488,6 +690,21 @@ public final class SCIP extends PointerType {
 		return JSCIP.CALL_SCIPtrySol(this, sol, printreason, completely, checkbounds,
 				checkintegrality, checklprows);
 	}
+	//SCIPcheckSol
+	//Returns true if it's feasible
+	public boolean checkSol(SCIP_SOL sol, boolean printreason, boolean completely,
+			boolean checkbounds, boolean checkintegrality, boolean checklprows) {
+		return JSCIP.CALL_SCIPcheckSol(this, sol, printreason, completely, checkbounds,
+				checkintegrality, checklprows);
+	}
+	//SCIPcheckSolOrig
+	//Returns true if it's feasible
+	public boolean checkSolOrig(SCIP_SOL sol, boolean printreason, boolean completely) {
+		return JSCIP.CALL_SCIPcheckSolOrig(this, sol, printreason, completely);
+	}
+	/* END scip_sol.h */
+	
+	/* scip_solve.h */
 	//SCIPenableReoptimization
 	public void enableReoptimization(boolean enable) { JSCIP.CALL_SCIPenableReoptimization(this, enable); }
 	//SCIPpresolve
@@ -498,8 +715,20 @@ public final class SCIP extends PointerType {
 	public void printOrigProblem(FILEPTR file, String extension, boolean genericnames) {
 		JSCIP.CALL_SCIPprintOrigProblem(this, file, extension, genericnames);
 	}
+	
+	/* scip_solvingstats.h */
 	//SCIPprintStatistics
 	public void printStatistics(FILEPTR file) { JSCIP.CALL_SCIPprintStatistics(this, file); }
+	/* END scip_solvingstats.h */
+	
+	/* scip_tree.h */
+	//SCIPgetCurrentNode
+	public SCIP_NODE getCurrentNode() { return JSCIP.getCurrentNode(this); }
+	//SCIPgetDepth
+	public int getDepth() { return JSCIP.getDepth(this); }
+	//SCIPrepropagateNode
+	public void repropagateNode(SCIP_NODE node) { JSCIP.CALL_SCIPrepropagateNode(this, node); }
+	/* END scip_tree.h */
 	
 	/* scip_var.h */
 	//SCIPcreateVar
@@ -601,8 +830,13 @@ public final class SCIP extends PointerType {
 			SCIP_CONS infercons, int inferinfo) {
 		return JSCIP.CALL_SCIPinferBinvarCons(this, var, fixedval, infercons, inferinfo);
 	}
+	//SCIPfixVar
+	public FixVarResult fixVar(SCIP_VAR var, double fixedval) {
+		return JSCIP.CALL_SCIPfixVar(this, var, fixedval);
+	}
 	//SCIPprintVar
 	public void printVar(SCIP_VAR var, FILEPTR file) { JSCIP.CALL_SCIPprintVar(this, var, file); }
+	/* END scip_var.h */
 	
 	/////////
 	

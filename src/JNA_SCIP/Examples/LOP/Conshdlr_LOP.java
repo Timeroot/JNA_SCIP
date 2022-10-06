@@ -6,11 +6,6 @@ import static JNA_SCIP.SCIP_RETCODE.*;
 import static JNA_SCIP.SCIP_RESULT.*;
 
 public class Conshdlr_LOP extends ConstraintHandler<Cons_LOP,Conshdlr_LOP> {
-
-	//Uncomment block below for the equivalent of #define SCIP_DEBUG.
-	//But it will hold for all Java code, not just this class.
-	
-	//static{ SCIP.DEBUG = true; }
 	
 	/* Constants to define behavior and timing */ 
 	static final String CONSHDLR_NAME		= "lop";

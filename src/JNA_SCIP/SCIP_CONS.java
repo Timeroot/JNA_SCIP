@@ -51,6 +51,8 @@ public class SCIP_CONS extends PointerType {
 	public int getNUses(){ return JSCIP.consGetNUses(this); }
 	//SCIPconsIsDeleted
 	public boolean isDeleted(){ return JSCIP.consIsDeleted(this); }
+	//SCIPconsIsActive
+	public boolean isActive(){ return JSCIP.consIsActive(this); }
 	//SCIPconsIsEnabled
 	public boolean isEnabled(){ return JSCIP.consIsEnabled(this); }
 	//SCIPconsIsAdded
